@@ -17,7 +17,14 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lvlick.whastcommerce",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.251388460791-cs38ak7mqlrlctmv1b7mvlbb0hab6ldl"
+        }
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +37,10 @@
         "WRITE_EXTERNAL_STORAGE",
         "NOTIFICACION",
         "USER_FACING_NOTIFICATIONS"
-      ]
+      ],
+      "useNextNotificationsApi": true,
+      "package": "com.lvlick.whastcommerce",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"

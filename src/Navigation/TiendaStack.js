@@ -21,13 +21,13 @@ export default function TiendaStack() {
                     title: ''
                 }} />
             <Stack.Screen component={MensajesList} name="mensajes"
-                option={{
+                options={{
                     title: 'Mensajes',
                     headerStyle: { backgroundColor: "#128C7E" },
                     headerTintColor: "#FFF",
                 }} />
             <Stack.Screen component={Contacto} name="contacto"
-                option={{
+                options={{
                     title: 'Contacto',
                     headerStyle: { backgroundColor: "#128C7E" },
                     headerTintColor: "#FFF",

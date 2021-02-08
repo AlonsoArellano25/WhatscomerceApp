@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { StyleSheet, Text, View, StatusBar } from 'react-native'
 import { Icon, Avatar, Input } from 'react-native-elements'
-import { subirImagenesBatch, addRegistroEspecifico, actualizarPerfil, ObtenerUsuario, enviarautenticacionphone, reauntenticar, actualizarEmailfirebase, actualizarTelefono } from '../../Utils/Acciones'
+import { subirImagenesBatch, addRegistroEspecifico, actualizarPerfil, ObtenerUsuario, enviarautenticacionphone, reauntenticar, actualizarEmailfirebase, actualizarTelefono, cerrarSesion } from '../../Utils/Acciones'
 import { cargarImagenesxAspecto, validateEmail } from '../../Utils/Utils'
 import Loading from '../../Components/Loading'
 import InputEditable from '../../Components/InputEditable'
@@ -161,6 +161,7 @@ export default function Perfil() {
                 verificationid={verificationid}
                 ConfirmarCodigo={ConfirmarCodigo}
             />
+            <Text style={styles.cerrarsesion} onPress={cerrarSesion}>Cerrar sesión</Text>
             <FirebaseRecapcha referencia={recapcha} />
             <Loading isVisible={loading} text="Por favor espere" />
         </View>
@@ -310,5 +311,11 @@ const styles = StyleSheet.create({
         marginTop: 20,
         fontSize: 14,
         textAlign: "center"
+    },
+    cerrarsesion: {
+        fontWeight: "bold",
+        fontSize: 20,
+        color: "red",
+        padding: 10
     }
 })
