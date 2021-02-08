@@ -1,2 +1,2 @@
 # whatscomerceapp
-App realiada con react native y firebase
+App realizada con react native y firebase
