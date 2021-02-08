@@ -6,6 +6,8 @@ import { validateEmail } from '../Utils/Utils'
 import { isEmpty } from 'lodash';
 import firebase from 'firebase'
 import Loading from './Loading'
+import * as GoogleSignIn from "expo-google-sign-in";
+//import * as Facebook from "expo-facebook";
 
 export default function LoginForm({ toastRef }) {
 
@@ -88,6 +90,7 @@ export default function LoginForm({ toastRef }) {
                         name="google"
                         color="#fff"
                         backgroundColor="transparent"
+                        onPress={() => signInAsync(setLoading)}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.loginsocial}>
@@ -100,10 +103,131 @@ export default function LoginForm({ toastRef }) {
                     />
                 </TouchableOpacity>
             </View>
-            <Loading isVisible={loading} text="Por favor, espero" />
+            <Loading isVisible={loading} text="Por favor, espere" />
         </View>
     )
 }
+
+/*********LOGICA DE GOOGLE***********************************/
+
+async function signInAsync(setLoading) {
+    try {
+        await GoogleSignIn.initAsync();
+        //const usuario = await GoogleSignIn.signInSilentlyAsync();
+        await GoogleSignIn.askForPlayServicesAsync(); //usar solo en android
+        const { type, user } = await GoogleSignIn.signInAsync();
+        console.log(type)
+        if (type === "success") {
+            onSignIn(user, setLoading);
+            setLoading(false);
+            return true;
+        } else {
+            setLoading(false);
+            alert(JSON.stringify(result));
+            return { cancelled: true };
+        }
+    } catch (e) {
+        setLoading(false);
+
+
+        alert(e.message);
+
+        return { error: true };
+    }
+}
+
+function onSignIn(googleUser, setLoading) {
+    const unsubscribe = firebase
+        .auth()
+        .onAuthStateChanged(function (firebaseUser) {
+            unsubscribe();
+            // Check if we are already signed-in Firebase with the correct user.
+            if (!isUserEqual(googleUser, firebaseUser)) {
+                // Build Firebase credential with the Google ID token.
+                var credential = firebase.auth.GoogleAuthProvider.credential(
+                    googleUser.auth.idToken,
+                    googleUser.auth.accessToken
+                );
+                // Sign in with credential from the Google user.
+                setLoading(true);
+                firebase
+                    .auth()
+                    .signInWithCredential(credential)
+                    .then((response) => {
+                        setLoading(false);
+                    })
+                    .catch(function (error) {
+                        // Handle Errors here.
+                        var errorCode = error.code;
+                        var errorMessage = error.message;
+                        // The email of the user's account used.
+                        var email = error.email;
+                        // The firebase.auth.AuthCredential type that was used.
+                        var credential = error.credential;
+                        alert(errorMessage);
+                        setLoading(false);
+                        // ...
+                    });
+            } else {
+                alert("Usuario ya está logueado");
+            }
+        });
+}
+
+function isUserEqual(googleUser, firebaseUser) {
+    if (firebaseUser) {
+        var providerData = firebaseUser.providerData;
+        for (var i = 0; i < providerData.length; i++) {
+            if (
+                providerData[i].providerId ===
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+                providerData[i].uid === googleUser.getBasicProfile().getId()
+            ) {
+                // We don't need to reauth the Firebase connection.
+                return true;
+            }
+        }
+    }
+    return false;
+}
+/**************************** FINAL GOOGLE **************************************** */
+
+/****************************FACEBOOK ********************************************** */
+// async function logIn() {
+//     try {
+//         await Facebook.initializeAsync({
+//             appId: "1560987580775767",
+//             appName: "omarcito",
+//             domain: "connect.facebook.net",
+//         });
+//         const {
+//             type,
+//             token,
+//             expires,
+//             permissions,
+//             declinedPermissions,
+//         } = await Facebook.logInWithReadPermissionsAsync({
+//             permissions: ["public_profile"],
+//         });
+//         if (type === "success") {
+//             // Get the user's name using Facebook's Graph API
+//             const response = await fetch(
+//                 `https://graph.facebook.com/me?access_token=${token}`
+//             );
+//             const credential = firebase.auth.FacebookAuthProvider.credential(token);
+//             firebase
+//                 .auth()
+//                 .signInWithCredential(credential)
+//                 .catch((error) => {
+//                     console.log(JSON.stringify(error));
+//                     alert(error.message);
+//                 });
+//         }
+//     } catch (err) {
+//         console.log(err);
+//     }
+// }
+
 
 const styles = StyleSheet.create({
     container: {

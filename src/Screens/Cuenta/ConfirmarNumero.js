@@ -14,11 +14,11 @@ export default function ConfirmarNumero(props) {
         setLoading(true)
         const resultado = await confirmarcodigo(verificacionid, code);
         if (resultado) {
-            //const token = await obtenerToken();
+            const token = await obtenerToken();
             const { uid, displayName, photoURL, email, phoneNumber } = ObtenerUsuario()
 
             const registro = await addRegistroEspecifico("Usuarios", uid, {
-                //token,
+                token,
                 displayName,
                 photoURL,
                 email,

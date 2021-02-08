@@ -6,8 +6,10 @@ import "firebase/firestore"
 import uuid from "random-uuid-v4"
 import { map } from 'lodash'
 import { convertirFicherBlob } from '../Utils/Utils'
+import { FireSQL } from 'firesql'
 
 const db = firebase.firestore(firebaseapp)
+const fireSQL = new FireSQL(firebase.firestore(), { includeId: "id" })
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -94,7 +96,7 @@ export const obtenerToken = async () => {
     }
 
     return token;
-}
+};
 
 export const ObtenerUsuario = () => {
     return firebase.auth().currentUser;
@@ -286,4 +288,116 @@ export const ListarProductos = async () => {
     }
 
     return productoslist
+}
+
+export const ListarProductosPorCategoria = async (categoria) => {
+    const productoslist = []
+    let index = 0
+
+    await db.collection("Productos")
+        .where("status", "==", 1)
+        .where("categoria", "==", categoria)
+        .get()
+        .then(resp => {
+            resp.forEach((doc) => {
+                const producto = doc.data()
+                producto.id = doc.id
+                productoslist.push(producto)
+            })
+        })
+        .catch((err) => { console.log(err) })
+
+    for (const registro of productoslist) {
+        const usuario = await obtenerRegistroPorId("Usuarios", registro.usuario)
+        productoslist[index].usuario = usuario.data
+        index++
+    }
+
+    return productoslist
+}
+
+export const Buscar = async (search) => {
+    let productos = []
+    await fireSQL.query(`select * from Productos where titulo like '${search}%'`)
+        .then((resp) => { productos = resp })
+
+    return productos
+}
+
+export const iniciarnotificaciones = (notificationListener, responseListener) => {
+    notificationListener.current = Notifications.addNotificationReceivedListener(
+        (notification) => {
+            console.log(notification)
+        }
+    )
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(
+        (resp) => {
+            console.log(resp)
+        }
+    )
+
+    return () => {
+        Notifications.removeNotificationSubscription(notificationListener)
+        Notifications.removeNotificationSubscription(responseListener)
+    }
+}
+
+export const sendPushNotification = async (mensaje) => {
+
+    let respuesta = false
+    await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(mensaje),
+    })
+        .then(resp => {
+            respuesta = true
+        })
+
+    return respuesta
+}
+
+export const setMensajeNotificacion = (token, titulo, body, data) => {
+    const message = {
+        to: token,
+        sound: 'default',
+        title: titulo,
+        body: body,
+        data: data,
+    };
+
+    return message
+}
+
+export const ListarNotificaciones = async () => {
+    let response = { statusresponse: false, data: [] }
+
+    let index = 0
+
+    await db.collection("Notificaciones")
+        .where("receiver", "==", ObtenerUsuario().uid)
+        .where("visto", "==", 0)
+        .get()
+        .then(resp => {
+            let datos =
+                resp.forEach(doc => {
+                    datos = doc.data()
+                    datos.id = doc.id
+                    response.data.push(datos)
+                })
+            response.statusresponse = true
+        })
+
+    for (const notificacion of response.data) {
+        const usuario = await obtenerRegistroPorId("Usuarios", notificacion.sender)
+        response.data[index].sender = usuario.data
+        index++
+    }
+
+    return response
 }

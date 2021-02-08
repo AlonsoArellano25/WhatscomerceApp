@@ -9,6 +9,7 @@ import TiendaStack from './TiendaStack';
 import PerfilStack from './PerfilStack';
 import MitiendaStack from './MiTiendaStack';
 import ShopButton from '../Components/ShopButton';
+import CustomDrawerContent from '../Components/CustomDrawerContent';
 
 const Tab = createBottomTabNavigator()
 const Drawer = createDrawerNavigator()
@@ -64,7 +65,18 @@ function mostrarIcono(route, color) {
 export default function RutasAutenticadas() {
     return (
         <NavigationContainer>
-            <TabBar />
+            <Drawer.Navigator
+                drawerContent={(props) => <CustomDrawerContent {...props} />}
+            >
+                <Drawer.Screen
+                    name="Tienda"
+                    component={TabBar}
+                    options={{
+                        title: "Tienda",
+                        drawerIcon: () => { <Icon type="material-community" name="strore" size={24} /> }
+                    }}
+                />
+            </Drawer.Navigator>
         </NavigationContainer>
     )
 }
